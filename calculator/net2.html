@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Net Salary Calculator</title>
+</head>
+<body>
+  <h2>Net Salary Calculator</h2>
+
+  <!-- Inputs -->
+  <label>Basic Salary: </label>
+  <input type="number" id="basicSalary"><br><br>
+
+  <label>Benefits: </label>
+  <input type="number" id="benefits"><br><br>
+
+  <button onclick="calculateSalary()">Calculate Net Salary</button>
+
+  <h3>Results:</h3>
+  <p id="output"></p>
+
+  <script>
+    function calculateSalary() {
+      // Step 1: Get input values
+      let basicSalary = parseFloat(document.getElementById("basicSalary").value);
+      let benefits = parseFloat(document.getElementById("benefits").value);
+
+      // Step 2: Gross Salary
+      let grossSalary = basicSalary + benefits;
+
+      // Step 3: PAYE (Tax)
+      let paye = calculatePAYE(grossSalary);
+      paye = Math.max(0, paye - 2400); // apply personal relief
+
+      // Step 4: SHIF (2.75%)
+      let shif = 0.0275 * grossSalary;
+
+      // Step 5: NSSF
+      let nssf = calculateNSSF(grossSalary);
+
+      // Step 6: Net Salary
+      let netSalary = grossSalary - (paye + shif + nssf);
+
+      // Step 7: Show results
+      document.getElementById("output").innerHTML = `
+        Gross Salary: ${grossSalary.toFixed(2)} <br>
+        PAYE (Tax): ${paye.toFixed(2)} <br>
+        SHIF: ${shif.toFixed(2)} <br>
+        NSSF: ${nssf.toFixed(2)} <br>
+        <strong>Net Salary: ${netSalary.toFixed(2)}</strong>
+      `;
+    }
+
+    // Function to calculate PAYE
+    function calculatePAYE(gross) {
+      let tax = 0;
+
+      if (gross <= 24000) {
+        tax = gross * 0.10;
+      } else if (gross <= 32333) {
+        tax = (24000 * 0.10) + ((gross - 24000) * 0.25);
+      } else if (gross <= 500000) {
+        tax = (24000 * 0.10) + (8333 * 0.25) + ((gross - 32333) * 0.30);
+      } else if (gross <= 800000) {
+        tax = (24000 * 0.10) + (8333 * 0.25) + ((500000 - 32333) * 0.30) + ((gross - 500000) * 0.325);
+      } else {
+        tax = (24000 * 0.10) + (8333 * 0.25) + ((500000 - 32333) * 0.30) + (300000 * 0.325) + ((gross - 800000) * 0.35);
+      }
+
+      return tax;
+    }
+
+    // Function to calculate NSSF
+    function calculateNSSF(gross) {
+      let tier1 = Math.min(gross, 8000) * 0.06;
+      let tier2 = 0;
+      if (gross > 8000) {
+        tier2 = Math.min(gross - 8000, 64000) * 0.06;
+      }
+      return tier1 + tier2;
+    }
+  </script>
+</body>
+</html>
